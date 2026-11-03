@@ -39,7 +39,7 @@ those locally. The original team repo is unchanged.
 3. Click Check out. Show the status and due date changing.
 4. Explain: “The form sends a POST request to Flask. Python checks availability,
    then calls our database code. The page reloads with the saved result.”
-5. Point to the form in `campusgear/templates/checkout.html` and the two routes
+5. Point to the form in `campusgear/templates/checkout.html` and the routes
    in `campusgear/web.py`: GET / displays data; POST /checkout performs checkout.
 
 ### Cam: SQL and saved records (1–2 minutes)
@@ -64,13 +64,20 @@ persistent storage. Authentication and full borrowing workflows are next.”
 | campusgear/db.py | Connection handling, SQL reads/writes, atomic checkout |
 | campusgear/schema.sql | Four tables and their constraints |
 | campusgear/demo.py | Separate terminal example covering all four record types |
-| tests/ | Ten automated checks for storage and the web checkout |
+| tests/ | Automated checks for storage and the web checkout |
 
 A loan optionally references a reservation. This supports both reserved and
 walk-in checkouts; linked borrower/item IDs must match. The team's original
 architecture described reservation-only loans, while backlog Req 12 requires
 walk-ins. Reflect this decision when integrating into the main project.
 [Original team documents](https://github.com/540jmc17/PROJECT-3-GROUP18/tree/main/docs).
+
+## Repeat the demo
+
+Click **Reset** beside Check out. It deletes the sample walk-in loan and restores
+item availability in one transaction. The user and equipment rows remain.
+This is a demo replay action, not a real return (which would retain loan history).
+The reset form sends POST /reset to Flask, which calls reset_checkout_example().
 
 ## Rehearse again without erasing data
 

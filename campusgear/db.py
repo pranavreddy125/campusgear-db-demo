@@ -118,3 +118,23 @@ def checkout_example(path, checkout_date, due_date):
             'INSERT INTO loans (user_id, equipment_id, checkout_date, due_date) '
             'VALUES (?, ?, ?, ?)', (1, 1, checkout_date, due_date))
         connection.execute("UPDATE equipment SET status = 'checked_out' WHERE id = ?", (1,))
+
+
+def reset_checkout_example(path):
+    """Remove the fixed sample checkout and restore availability atomically.
+
+    Demo replay only: this deletes sample history, unlike a real return.
+    Other borrowers/items and reservation-linked loans are left alone.
+    """
+    with transaction(path) as connection:
+        connection.execute('BEGIN IMMEDIATE')
+        connection.execute(
+            'DELETE FROM loans WHERE user_id = 1 AND equipment_id = 1 '
+            'AND reservation_id IS NULL')
+        remaining = connection.execute(
+            'SELECT id FROM loans WHERE equipment_id = 1 AND status = ?',
+            ('checked_out',)).fetchone()
+        if remaining is None:
+            connection.execute(
+                "UPDATE equipment SET status = 'available' "
+                "WHERE id = 1 AND status = 'checked_out'")

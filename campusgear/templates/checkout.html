@@ -19,6 +19,8 @@
     dd { margin: 0; }
     button { padding: 10px 18px; font: inherit; background: #222; color: white;
              border: 1px solid #222; border-radius: 3px; cursor: pointer; }
+    form { display: inline-block; margin-right: 8px; }
+    .reset { background: white; color: #222; }
     button:disabled { background: #eee; color: #666; border-color: #ccc; cursor: default; }
     .error { color: #a11; }
   </style>
@@ -54,6 +56,9 @@
         <button type="submit" {% if item.status != 'available' %}disabled{% endif %}>
           {{ 'Check out' if item.status == 'available' else 'Checked out' }}
         </button>
+      </form>
+      <form method="post" action="{{ url_for('reset') }}">
+        <button class="reset" type="submit">Reset</button>
       </form>
     </section>
   </main>

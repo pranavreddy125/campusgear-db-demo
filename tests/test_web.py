@@ -43,6 +43,18 @@ class CheckoutTests(unittest.TestCase):
             self.assertEqual(connection.execute('SELECT status FROM equipment').fetchone()[0],
                              'checked_out')
 
+    def test_reset_allows_another_checkout(self):
+        self.assertEqual(self.client.get('/reset').status_code, 405)
+        self.client.post('/checkout')
+        self.assertEqual(self.client.post('/reset').status_code, 303)
+        self.assertIn(b'Available', self.client.get('/').data)
+        with transaction(self.path) as connection:
+            self.assertEqual(connection.execute('SELECT count(*) FROM loans').fetchone()[0], 0)
+            self.assertEqual(connection.execute('SELECT count(*) FROM users').fetchone()[0], 1)
+            self.assertEqual(connection.execute('SELECT count(*) FROM equipment').fetchone()[0], 1)
+        self.assertEqual(self.client.post('/reset').status_code, 303)
+        self.assertEqual(self.client.post('/checkout').status_code, 303)
+
     def test_double_click_creates_only_one_loan(self):
         def click(_):
             with self.app.test_client() as client:

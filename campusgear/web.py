@@ -14,7 +14,7 @@ import os
 
 from flask import Flask, redirect, render_template, url_for
 
-from .db import DEFAULT_PATH, prepare_checkout_example, read_checkout_example, checkout_example
+from .db import DEFAULT_PATH, prepare_checkout_example, read_checkout_example, checkout_example, reset_checkout_example
 
 
 def create_app(database_path=None):
@@ -40,6 +40,12 @@ def create_app(database_path=None):
             checkout_example(path, today.isoformat(), (today + timedelta(days=7)).isoformat())
         except ValueError as error:
             return page(str(error)), 409
+        return redirect(url_for('index'), code=303)
+
+    @app.post('/reset')
+    def reset():
+        """Clear this sample checkout so the presentation can be repeated."""
+        reset_checkout_example(path)
         return redirect(url_for('index'), code=303)
 
     return app
