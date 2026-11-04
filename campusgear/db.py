@@ -75,66 +75,15 @@ def get_record(connection, table, record_id):
     return dict(row) if row else None
 
 
-def prepare_checkout_example(path):
-    """Seed the dedicated web example once; preserve existing checkouts."""
-    initialize(path)
-    with transaction(path) as connection:
-        connection.execute('BEGIN IMMEDIATE')
-        if connection.execute('SELECT id FROM users LIMIT 1').fetchone() is None:
-            insert_record(connection, 'users', name='Alex Morgan',
-                          email='alex.morgan@example.invalid',
-                          password_hash='!login-disabled', role='student')
-            insert_record(connection, 'equipment', asset_id='KU-001',
-                          name='Raspberry Pi Kit', category='Electronics',
-                          description='Raspberry Pi with power supply, case, and cables.')
+def list_equipment(connection, available_only=False):
+    """Return equipment dictionaries in ID order, optionally only available items.
 
-
-def read_checkout_example(path):
-    """Read the fixed student, item, and any saved loan for the page."""
-    with transaction(path) as connection:
-        student = connection.execute('SELECT id, name FROM users WHERE id = 1').fetchone()
-        item = get_record(connection, 'equipment', 1)
-        loan = connection.execute(
-            'SELECT * FROM loans WHERE equipment_id = 1 ORDER BY id DESC LIMIT 1'
-        ).fetchone()
-        return student, item, loan
-
-
-def checkout_example(path, checkout_date, due_date):
-    """Check out the example item atomically; reject a repeated checkout.
-
-    Raises ValueError when unavailable and sqlite3 errors for invalid records.
-    Fixed student/item IDs are for this isolated local example, not authorization.
+    Reads current stored status; this does not check future reservation dates.
     """
-    with transaction(path) as connection:
-        # Lock before reading so two clicks cannot both see an available item.
-        connection.execute('BEGIN IMMEDIATE')
-        item = get_record(connection, 'equipment', 1)
-        if item is None or item['status'] != 'available':
-            raise ValueError('This item is already checked out or unavailable.')
-
-        # Both writes commit together. If either fails, neither is saved.
-        connection.execute(
-            'INSERT INTO loans (user_id, equipment_id, checkout_date, due_date) '
-            'VALUES (?, ?, ?, ?)', (1, 1, checkout_date, due_date))
-        connection.execute("UPDATE equipment SET status = 'checked_out' WHERE id = ?", (1,))
-
-
-def reset_checkout_example(path):
-    """Remove the fixed sample checkout and restore availability atomically.
-
-    Demo replay only: this deletes sample history, unlike a real return.
-    Other borrowers/items and reservation-linked loans are left alone.
-    """
-    with transaction(path) as connection:
-        connection.execute('BEGIN IMMEDIATE')
-        connection.execute(
-            'DELETE FROM loans WHERE user_id = 1 AND equipment_id = 1 '
-            'AND reservation_id IS NULL')
-        remaining = connection.execute(
-            'SELECT id FROM loans WHERE equipment_id = 1 AND status = ?',
-            ('checked_out',)).fetchone()
-        if remaining is None:
-            connection.execute(
-                "UPDATE equipment SET status = 'available' "
-                "WHERE id = 1 AND status = 'checked_out'")
+    sql = 'SELECT * FROM equipment'
+    parameters = ()
+    if available_only:
+        sql += ' WHERE status = ?'
+        parameters = ('available',)
+    rows = connection.execute(sql + ' ORDER BY id', parameters).fetchall()
+    return [dict(row) for row in rows]

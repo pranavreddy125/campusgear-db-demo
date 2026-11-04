@@ -10,7 +10,7 @@ import sqlite3
 import tempfile
 import unittest
 
-from campusgear.db import initialize, transaction, insert_record, get_record
+from campusgear.db import initialize, transaction, insert_record, get_record, list_equipment
 from campusgear.demo import seed
 
 
@@ -20,6 +20,17 @@ class DatabaseTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.path = Path(self.temp.name) / 'test.sqlite3'
         seed(self.path)
+
+    def test_equipment_registration_and_catalog(self):
+        with transaction(self.path) as connection:
+            item_id = insert_record(connection, 'equipment', asset_id='KU-003',
+                                    name='Camera', category='Photography', description='Camera kit')
+        with transaction(self.path) as connection:
+            self.assertEqual(len(list_equipment(connection)), 3)
+            available = list_equipment(connection, available_only=True)
+            self.assertEqual([item['id'] for item in available], [item_id])
+            self.assertEqual(available[0]['name'], 'Camera')
+            self.assertEqual(available[0]['status'], 'available')
 
     def test_reinitialize_preserves_all_records(self):
         initialize(self.path)
