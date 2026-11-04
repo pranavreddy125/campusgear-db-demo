@@ -12,7 +12,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 import os
 
-from flask import Flask, redirect, render_template, url_for
+from flask import Flask, redirect, render_template, url_for, request
 
 from .db import DEFAULT_PATH, prepare_checkout_example, read_checkout_example, checkout_example, reset_checkout_example
 
@@ -23,9 +23,14 @@ def create_app(database_path=None):
         'CAMPUSGEAR_DEMO_DB', DEFAULT_PATH.parent / 'checkout-example.sqlite3'))
     prepare_checkout_example(path)
 
+    def selected_role():
+        # Temporary display choice only; real login will supply the role later.
+        role = request.values.get('role', 'student')
+        return role if role in ('student', 'staff') else 'student'
+
     def page(error=None):
         student, item, loan = read_checkout_example(path)
-        return render_template('checkout.html', student=student, item=item, loan=loan, error=error)
+        return render_template('checkout.html', student=student, item=item, loan=loan, error=error, role=selected_role())
 
     @app.get('/')
     def index():
@@ -40,12 +45,12 @@ def create_app(database_path=None):
             checkout_example(path, today.isoformat(), (today + timedelta(days=7)).isoformat())
         except ValueError as error:
             return page(str(error)), 409
-        return redirect(url_for('index'), code=303)
+        return redirect(url_for('index', role=selected_role()), code=303)
 
     @app.post('/reset')
     def reset():
         """Clear this sample checkout so the presentation can be repeated."""
         reset_checkout_example(path)
-        return redirect(url_for('index'), code=303)
+        return redirect(url_for('index', role=selected_role()), code=303)
 
     return app

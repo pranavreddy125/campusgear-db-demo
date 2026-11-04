@@ -43,6 +43,18 @@ class CheckoutTests(unittest.TestCase):
             self.assertEqual(connection.execute('SELECT status FROM equipment').fetchone()[0],
                              'checked_out')
 
+    def test_role_preview_and_preservation(self):
+        student = self.client.get('/?role=student').data
+        self.assertIn(b'Reserve equipment', student)
+        self.assertNotIn(b'Add equipment', student)
+        staff = self.client.get('/?role=staff').data
+        self.assertIn(b'Add equipment', staff)
+        self.assertNotIn(b'Reserve equipment', staff)
+        self.assertIn(b'Student options', self.client.get('/?role=admin').data)
+        for action in ('/checkout', '/reset'):
+            response = self.client.post(action, data={'role': 'staff'}, follow_redirects=True)
+            self.assertIn(b'Staff options', response.data)
+
     def test_reset_allows_another_checkout(self):
         self.assertEqual(self.client.get('/reset').status_code, 405)
         self.client.post('/checkout')

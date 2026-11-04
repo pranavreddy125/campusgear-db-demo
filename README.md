@@ -103,3 +103,34 @@ Tests check references, uniqueness, dates, persistence, duplicate requests, and
 rollback when a checkout write fails. The terminal demo creates a separate
 `instance/demo-....sqlite3` with a reservation-based loan and a walk-in loan.
 Database initialization preserves data but is not a schema migration tool.
+
+## Requirement 7 display preview
+
+Choose Student or Staff under Preview as, then click Show view. Flask reads the
+role query parameter and the HTML template displays the matching menu/options.
+Student: Reserve equipment, My reservations and loans. Staff: Add equipment,
+Manage equipment. These buttons are disabled placeholders, not completed workflows.
+The separate Database test works in either view. Checkout/reset preserve the view.
+The selector does not authenticate users or enforce permissions. Replace this
+role source with the logged-in account when the login team is ready.
+
+## Team integration for the progress demo
+
+- Pranav/Cameren: schema, initialization, database save/read helpers, sample data,
+  and student/staff display conditions. Integrate these into the shared Flask app.
+- John/Jake: shared UI/skeleton files, navigation layout, how to run the app, and
+  agreed template/route locations. We will place the role selector and conditional
+  options in that UI when it is available.
+- Karim/Ahmed: equipment-registration form and catalog page, including their Flask
+  route handlers. Form fields: name, category, description, asset_id. Use our
+  shared database connection/helpers to save equipment and query it for the catalog.
+  Handle missing inputs/duplicate asset IDs and show saved equipment/availability.
+  They need our schema and helper interface; we need their page/route names to link
+  staff registration and the catalog into the shared UI.
+- Zema/Nate: no login dependency for this TA progress demo. Later supply the
+  authenticated user ID/role and password hashing; enforce backend permissions.
+
+The combined equipment demo can be staff preview → registration form → SQLite →
+catalog showing the new item. Until those pages are ready, our standalone page
+shows database connectivity and role-specific display only. Reservations remain
+placeholders; a selector alone does not meet the final after-login Req 7 check.
