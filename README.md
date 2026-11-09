@@ -18,9 +18,10 @@ python -m flask --app campusgear.web run --port 5810
 If already cloned, run `git switch main` and `git pull` first.
 On Windows, use `py -m venv .venv` and `.venv\Scripts\activate` in Command Prompt.
 
-- **Req 1:** the terminal demo saves all four record types, reads them in a new
-  process, and rejects an invalid relationship. Open its printed `.sqlite3` path
-  in DB Browser → Browse Data. Each run creates a separate sample database.
+- **Req 1:** Flask initializes `instance/campusgear.sqlite3` on startup and reads
+  saved equipment on the preview page. The application database starts empty and
+  keeps its records across restarts. The terminal demo uses a separate sample
+  database to verify storage for all four record types and foreign key checks.
 - **Req 7:** open http://127.0.0.1:5810, select Student/Staff, and click Show view.
   Options are placeholders. No login or permissions yet; integrate into Jake/John’s
   UI later and replace the selector with the real account role for the release.

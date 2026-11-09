@@ -39,8 +39,7 @@ All feature handlers must use the same file. If the shared Flask application cho
 another location, pass that identical path to `initialize(path)` and every
 `transaction(path)` call. For example, the shared application may define
 `app.config['DATABASE']` and handlers use `transaction(current_app.config['DATABASE'])`.
-That configuration key is an integration convention to agree on, not an existing
-setting in this preview.
+The Flask preview uses `app.config['DATABASE']` for its shared database path.
 
 Initialization creates empty tables and preserves existing rows. Schema changes to
 existing tables require a coordinated migration. The terminal demo creates separate
@@ -279,7 +278,8 @@ python -m flask --app campusgear.web run --port 5810
 
 The terminal demo prints its separate database path and verifies save/retrieve,
 persistence in a fresh Python process, and rejection of an invalid relationship.
-The web command starts the role preview. It does not initialize an application DB.
+The web command starts the role preview, initializes the application database,
+and reads saved equipment from it.
 
 When the combined application is ready, its TA README needs the shared dependency
 installation command, one DB initialization command, test-account setup, the actual

@@ -53,6 +53,18 @@
       {% endif %}
       <p class="note">These options show the planned interface; their pages are not connected yet.</p>
     </section>
+    <section>
+      <h2>Saved equipment</h2>
+      {% if equipment %}
+        <ul>
+          {% for item in equipment %}
+            <li>{{ item.name }} ({{ item.asset_id }}) — {{ item.status | replace('_', ' ') }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No equipment has been saved yet.</p>
+      {% endif %}
+    </section>
   </main>
 </body>
 </html>
