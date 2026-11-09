@@ -23,8 +23,18 @@ On Windows, use `py -m venv .venv` and `.venv\Scripts\activate` in Command Promp
   keeps its records across restarts. The terminal demo uses a separate sample
   database to verify storage for all four record types and foreign key checks.
 - **Req 7:** open http://127.0.0.1:5810, select Student/Staff, and click Show view.
-  Options are placeholders. No login or permissions yet; integrate into Jake/John’s
-  UI later and replace the selector with the real account role for the release.
+  To try a reservation, stop Flask and restart it with the sample database printed
+  by `python -m campusgear.demo`:
+
+  ```bash
+  python -m flask --app "campusgear.web:create_app('instance/demo-EXAMPLE.sqlite3')" run --port 5810
+  ```
+
+  Replace `demo-EXAMPLE.sqlite3` with the printed filename. In the Student view,
+  choose the Camera Kit and enter pickup and return dates. Reservations are saved
+  for the sample student. In the Staff view, use **Add equipment** to register an
+  item and **Manage equipment** to change its condition or status. Both views use
+  the same database. The demo role selector has no login.
 
 ## Files
 

@@ -23,14 +23,15 @@ class DatabaseTests(unittest.TestCase):
 
     def test_equipment_registration_and_catalog(self):
         with transaction(self.path) as connection:
-            item_id = insert_record(connection, 'equipment', asset_id='KU-003',
+            item_id = insert_record(connection, 'equipment', asset_id='KU-004',
                                     name='Camera', category='Photography', description='Camera kit')
         with transaction(self.path) as connection:
-            self.assertEqual(len(list_equipment(connection)), 3)
+            self.assertEqual(len(list_equipment(connection)), 4)
             available = list_equipment(connection, available_only=True)
-            self.assertEqual([item['id'] for item in available], [item_id])
-            self.assertEqual(available[0]['name'], 'Camera')
-            self.assertEqual(available[0]['status'], 'available')
+            self.assertEqual([item['asset_id'] for item in available], ['KU-003', 'KU-004'])
+            self.assertEqual(available[1]['id'], item_id)
+            self.assertEqual(available[1]['name'], 'Camera')
+            self.assertEqual(available[1]['status'], 'available')
 
     def test_reinitialize_preserves_all_records(self):
         initialize(self.path)

@@ -21,6 +21,10 @@
     button:disabled { background: #eee; color: #666; border-color: #ccc; cursor: default; }
     select { font: inherit; padding: 8px; margin: 0 8px; }
     .note { color: #555; font-size: 14px; }
+    .equipment-form { display: block; margin-bottom: 18px; }
+    .equipment-form label { display: block; }
+    .equipment-form input, .equipment-form textarea { font: inherit; }
+    .equipment-form button { display: block; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -40,18 +44,66 @@
       </select>
       <button type="submit">Show view</button>
     </form>
-    <p class="note">Display preview only — no login or permissions are applied.</p>
+    <p class="note">Local demo with no login. Reservations use the sample student account.</p>
     <section id="role-options">
       {% if role == 'student' %}
         <h2>Student options</h2>
-        <button disabled>Reserve equipment</button>
         <button disabled>My reservations and loans</button>
+        <h3>Reserve equipment</h3>
+        {% if error %}<p role="alert">{{ error }}</p>
+        {% elif request.args.get('reserved') == '1' %}<p role="status">Reservation saved.</p>{% endif %}
+        {% if available %}
+          <form method="post" action="{{ url_for('reserve') }}">
+            <label for="equipment-id">Equipment</label>
+            <select id="equipment-id" name="equipment_id" required>
+              {% for item in available %}
+                <option value="{{ item.id }}">{{ item.name }} ({{ item.asset_id }})</option>
+              {% endfor %}
+            </select>
+            <label for="pickup-date">Pickup date</label>
+            <input type="date" id="pickup-date" name="pickup_date" required>
+            <label for="return-date">Return date</label>
+            <input type="date" id="return-date" name="return_date" required>
+            <button type="submit">Reserve</button>
+          </form>
+        {% else %}
+          <p>No equipment is available to reserve.</p>
+        {% endif %}
       {% else %}
         <h2>Staff options</h2>
-        <button disabled>Add equipment</button>
-        <button disabled>Manage equipment</button>
+        {% if error %}<p role="alert">{{ error }}</p>
+        {% elif request.args.get('added') == '1' %}<p role="status">Equipment added.</p>{% endif %}
+        <h3>Add equipment</h3>
+        <form class="equipment-form" method="post" action="{{ url_for('add_equipment') }}">
+          <label for="asset-id">Asset ID</label>
+          <input id="asset-id" name="asset_id" required>
+          <label for="equipment-name">Name</label>
+          <input id="equipment-name" name="name" required>
+          <label for="equipment-category">Category</label>
+          <input id="equipment-category" name="category" required>
+          <label for="equipment-description">Description</label>
+          <textarea id="equipment-description" name="description" required></textarea>
+          <button type="submit">Add equipment</button>
+        </form>
+        <h3 id="manage-equipment">Manage equipment</h3>
+        {% if request.args.get('updated') == '1' %}<p role="status">Equipment updated.</p>{% endif %}
+        {% for item in equipment %}
+          <form class="equipment-form" method="post" action="{{ url_for('update_equipment', equipment_id=item.id) }}">
+            <h4>{{ item.name }} ({{ item.asset_id }})</h4>
+            <label for="condition-{{ item.id }}">Condition</label>
+            <input id="condition-{{ item.id }}" name="condition" value="{{ item.condition }}" required>
+            <label for="status-{{ item.id }}">Status</label>
+            <select id="status-{{ item.id }}" name="status">
+              {% for status in equipment_statuses %}
+                <option value="{{ status }}" {% if status == item.status %}selected{% endif %}>{{ status | replace('_', ' ') }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit">Save changes</button>
+          </form>
+        {% else %}
+          <p>Add an item to start managing equipment.</p>
+        {% endfor %}
       {% endif %}
-      <p class="note">These options show the planned interface; their pages are not connected yet.</p>
     </section>
     <section>
       <h2>Saved equipment</h2>

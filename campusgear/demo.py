@@ -9,13 +9,15 @@ from uuid import uuid4
 
 from .db import DEFAULT_PATH, initialize, transaction, insert_record, get_record
 
+DEMO_STUDENT_EMAIL = 'alex.morgan@example.invalid'
+
 
 def seed(path):
     """Save all four record types together, including a separate walk-in loan."""
     initialize(path)
     with transaction(path) as connection:
         student = insert_record(connection, 'users', name='Alex Morgan',
-                                email='alex.morgan@example.invalid',
+                                email=DEMO_STUDENT_EMAIL,
                                 password_hash='!demo-login-disabled', role='student')
         insert_record(connection, 'users', name='Jordan Lee', email='jordan.lee@example.invalid',
                       password_hash='!demo-login-disabled', role='staff')
@@ -32,6 +34,8 @@ def seed(path):
             insert_record(connection, 'loans', user_id=student, equipment_id=item,
                           reservation_id=reservation_id, checkout_date='2026-11-03',
                           due_date='2026-11-10')
+        insert_record(connection, 'equipment', asset_id='KU-003', name='Camera Kit',
+                      category='Photography', description='Camera with lens and carrying case.')
 
 
 def verify(path):
@@ -39,7 +43,7 @@ def verify(path):
     with transaction(path) as connection:
         counts = {table: connection.execute(f'SELECT count(*) FROM {table}').fetchone()[0]
                   for table in ('users', 'equipment', 'reservations', 'loans')}
-        assert counts == {'users': 2, 'equipment': 2, 'reservations': 1, 'loans': 2}
+        assert counts == {'users': 2, 'equipment': 3, 'reservations': 1, 'loans': 2}
         assert get_record(connection, 'users', 1)['role'] == 'student'
         assert get_record(connection, 'equipment', 1)['asset_id'] == 'KU-001'
         assert get_record(connection, 'reservations', 1)['user_id'] == 1
