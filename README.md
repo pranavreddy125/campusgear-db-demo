@@ -47,5 +47,3 @@ checkout/reset workflows, or login in this branch. Sample loans remain for Req 1
 Karim/Ahmed’s database interface is in [EQUIPMENT_INTEGRATION.md](EQUIPMENT_INTEGRATION.md).
 No request to Jake/John is needed yet; their UI files will be needed at integration.
 Database files and virtual environments stay local and are ignored by Git.
-
-Full team integration details, organized by requirement, are in [handoff.md](handoff.md).
